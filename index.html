@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>転生したら竹千代（10歳）だった件</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700;900&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a1208;--gold:#c8963c;--gold2:#e8b84b;
+  --red:#8b2020;--red2:#c0392b;
+  --green:#1e5c2e;--green2:#27ae60;
+  --blue:#1a3a5c;--blue2:#2980b9;
+  --fs:18px;--fs-sm:16px;--fs-xs:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--ink);font-family:'Noto Sans JP',sans-serif;font-size:var(--fs);min-height:100vh;display:flex;flex-direction:column;align-items:center;}
+
+/* タイトル */
+#screen-title{width:100%;min-height:100vh;background:radial-gradient(ellipse at 60% 40%,#2a1a08,#0d0904);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center;}
+.title-kamon{font-size:72px;margin-bottom:20px;animation:float 3s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.title-main{font-family:'Noto Serif JP',serif;font-size:clamp(20px,4vw,32px);color:var(--gold2);letter-spacing:4px;line-height:1.8;text-shadow:0 0 30px rgba(200,150,60,.5);margin-bottom:10px;}
+.title-sub{font-family:'Noto Serif JP',serif;font-size:clamp(16px,2.5vw,22px);color:#a08850;letter-spacing:6px;margin-bottom:40px;}
+.title-catch{font-size:18px;color:#7a6840;letter-spacing:2px;margin-bottom:60px;font-style:italic;}
+.btn-start{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--ink);border:none;border-radius:6px;padding:18px 52px;font-family:'Noto Serif JP',serif;font-size:20px;font-weight:700;letter-spacing:4px;cursor:pointer;box-shadow:0 4px 20px rgba(200,150,60,.4);transition:all .2s;}
+.btn-start:hover{transform:translateY(-2px);}
+
+/* ゲーム画面 */
+#screen-game{display:none;width:100%;max-width:680px;padding:12px;}
+
+/* フェーズバー */
+.phase-bar{background:#120d06;border:1px solid var(--gold);border-radius:8px;padding:10px 16px;display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+.phase-label{font-family:'Noto Serif JP',serif;color:var(--gold2);font-size:var(--fs-sm);letter-spacing:2px;white-space:nowrap;}
+.phase-dots{display:flex;gap:6px;}
+.phase-dot{width:28px;height:8px;border-radius:4px;background:#333;border:1px solid #555;transition:all .4s;}
+.phase-dot.active{background:var(--gold);border-color:var(--gold2);box-shadow:0 0 8px rgba(200,150,60,.6);}
+.phase-dot.done{background:#5a4820;}
+.year-info{margin-left:auto;color:var(--gold2);font-size:var(--fs-sm);font-family:'Noto Serif JP',serif;font-weight:700;}
+
+/* ログ */
+.log-area{background:#0d0904;border:1px solid #3a2e1a;border-radius:8px;padding:12px 14px;height:150px;overflow-y:auto;margin-bottom:10px;}
+.log-area::-webkit-scrollbar{width:4px;}
+.log-area::-webkit-scrollbar-thumb{background:#3a2e1a;border-radius:2px;}
+.log-entry{font-size:var(--fs-sm);line-height:1.9;padding:2px 0;border-bottom:1px solid #1a1408;color:#c8b880;animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateX(-4px)}to{opacity:1;transform:translateX(0)}}
+.log-entry.system{color:var(--gold2);font-weight:700;}
+.log-entry.warning{color:#e8a020;}
+.log-entry.good{color:var(--green2);}
+.log-entry.fail{color:#c05030;}
+.log-phase{color:var(--gold);font-family:'Noto Serif JP',serif;font-size:var(--fs-sm);font-weight:700;border-bottom:1px solid var(--gold);padding-bottom:4px;margin-bottom:4px;}
+
+/* タブ */
+.tab-bar{display:flex;gap:6px;margin-bottom:0;}
+.tab-btn{flex:1;background:#120d06;border:1px solid #3a2e1a;border-radius:6px 6px 0 0;color:#7a6840;padding:10px 0;font-size:var(--fs-sm);font-family:'Noto Serif JP',serif;letter-spacing:2px;cursor:pointer;transition:all .2s;border-bottom:none;}
+.tab-btn.active{background:#1e1810;border-color:var(--gold);color:var(--gold2);}
+.tab-content{display:none;background:#1e1810;border:1px solid var(--gold);border-top:none;border-radius:0 0 8px 8px;padding:14px;}
+.tab-content.active{display:block;}
+
+/* パラメータ */
+.param-section{margin-bottom:16px;}
+.param-section-title{font-size:var(--fs-xs);color:var(--gold);letter-spacing:2px;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #3a2e1a;font-family:'Noto Serif JP',serif;}
+.param-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.param-row-label{font-size:var(--fs-sm);color:#a08850;white-space:nowrap;width:148px;flex-shrink:0;}
+.param-bar-wrap{flex:1;background:#0d0904;border-radius:4px;height:12px;overflow:hidden;border:1px solid #2a2010;}
+.param-bar{height:100%;border-radius:4px;transition:width .5s ease;}
+.bar-trust{background:linear-gradient(90deg,var(--gold),var(--gold2));}
+.bar-bare{background:linear-gradient(90deg,var(--green),var(--green2));}
+.bar-bare.warn{background:linear-gradient(90deg,#8b6b00,#c89a00);}
+.bar-bare.danger{background:linear-gradient(90deg,var(--red),var(--red2));}
+.bar-nobunaga{background:linear-gradient(90deg,#4a1a5c,#8b30b0);}
+.bar-exec{background:linear-gradient(90deg,#2a1a6a,#6a50bf);}
+.param-val{font-size:var(--fs-sm);color:#c8b880;font-weight:700;white-space:nowrap;width:90px;text-align:right;}
+.stat-table{width:100%;border-collapse:collapse;}
+.stat-table td{padding:7px 6px;font-size:var(--fs-sm);border-bottom:1px solid #2a2010;}
+.stat-table td:first-child{color:#a08850;}
+.stat-table td:last-child{text-align:right;color:#c8b880;font-weight:700;}
+.stat-table tr:last-child td{border-bottom:none;}
+.good{color:var(--green2)!important;}
+.warn{color:#e8a020!important;}
+.danger{color:var(--red2)!important;}
+
+/* 敵国パネル */
+.enemy-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;}
+.enemy-card{background:#120d06;border:1px solid #3a2e1a;border-radius:6px;padding:10px 12px;}
+.enemy-name{font-size:var(--fs-sm);color:var(--gold2);font-weight:700;margin-bottom:6px;}
+.enemy-row{font-size:var(--fs-xs);color:#a08850;line-height:1.8;}
+.enemy-val{color:#c8b880;font-weight:700;}
+
+/* アコーディオン */
+.acc-header{display:flex;align-items:center;justify-content:space-between;padding:11px 12px;background:#160e08;border:1px solid #3a2e1a;border-radius:6px;cursor:pointer;margin-bottom:6px;transition:all .2s;user-select:none;}
+.acc-header:hover{border-color:var(--gold);background:#201408;}
+.acc-header.open{border-color:var(--gold);border-radius:6px 6px 0 0;margin-bottom:0;}
+.acc-title{font-size:var(--fs-sm);color:var(--gold2);font-weight:700;}
+.acc-arrow{font-size:14px;color:#7a6840;transition:transform .25s;}
+.acc-header.open .acc-arrow{transform:rotate(180deg);}
+.acc-body{display:none;border:1px solid var(--gold);border-top:none;border-radius:0 0 6px 6px;padding:10px 10px 6px;margin-bottom:8px;background:#120d06;}
+.acc-body.open{display:block;}
+
+/* コマンドボタン */
+.cmd-btn{display:block;width:100%;background:linear-gradient(135deg,#1e1810,#160e08);border:1px solid #3a2e1a;border-radius:6px;color:#c8b880;padding:10px 12px;font-family:'Noto Sans JP',sans-serif;font-size:var(--fs-sm);text-align:left;cursor:pointer;margin-bottom:6px;transition:all .15s;line-height:1.6;}
+.cmd-btn:last-child{margin-bottom:0;}
+.cmd-btn:hover:not(:disabled){background:linear-gradient(135deg,#2e2418,#201808);border-color:var(--gold);color:var(--gold2);}
+.cmd-btn:disabled{opacity:.3;cursor:not-allowed;}
+.cmd-header-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;}
+.cmd-name{font-weight:700;font-size:var(--fs);}
+.cmd-diff{font-size:var(--fs-xs);padding:2px 7px;border-radius:4px;font-weight:700;}
+.diff-easy{background:#1e3a1e;color:var(--green2);}
+.diff-possible{background:#1a2e3a;color:var(--blue2);}
+.diff-challenge{background:#3a3010;color:#e8c840;}
+.diff-hard{background:#3a1a10;color:#e87840;}
+.diff-impossible{background:#2a1010;color:#888;}
+.cmd-desc{font-size:var(--fs-xs);color:#5a4820;margin-top:1px;}
+.cmd-effect{font-size:var(--fs-xs);color:#7a6040;margin-top:2px;}
+.cmd-lock{font-size:var(--fs-xs);color:#c05030;margin-top:2px;}
+
+.btn-turn{display:block;width:100%;background:linear-gradient(135deg,#2a1e10,#1a1208);border:1px solid var(--gold);border-radius:6px;color:var(--gold2);padding:13px;font-family:'Noto Serif JP',serif;font-size:var(--fs);letter-spacing:3px;cursor:pointer;transition:all .2s;margin-top:10px;}
+.btn-turn:hover{background:linear-gradient(135deg,#3a2e18,#2a1e10);box-shadow:0 0 12px rgba(200,150,60,.3);}
+
+/* フラッシュ */
+.result-flash{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Noto Serif JP',serif;font-size:40px;font-weight:900;padding:16px 48px;border-radius:10px;z-index:200;pointer-events:none;animation:flashAnim .9s ease forwards;}
+@keyframes flashAnim{0%{opacity:0;transform:translate(-50%,-50%) scale(.7)}30%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}70%{opacity:1}100%{opacity:0}}
+.result-flash.success{background:rgba(20,50,20,.97);border:2px solid var(--green2);color:var(--green2);}
+.result-flash.fail{background:rgba(50,15,15,.97);border:2px solid var(--red2);color:var(--red2);}
+
+/* モーダル */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.87);z-index:100;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.show{display:flex;}
+.modal-box{background:linear-gradient(160deg,#1e1810,#100c06);border:1px solid var(--gold);border-radius:10px;padding:26px 22px;max-width:480px;width:100%;box-shadow:0 0 40px rgba(200,150,60,.2);animation:modalIn .3s ease;max-height:90vh;overflow-y:auto;}
+@keyframes modalIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+.modal-tag{font-size:var(--fs-xs);color:var(--gold);letter-spacing:3px;margin-bottom:8px;}
+.modal-title{font-family:'Noto Serif JP',serif;font-size:20px;color:#f0e0b0;margin-bottom:12px;line-height:1.6;}
+.modal-body{font-size:var(--fs-sm);color:#a09060;line-height:2;margin-bottom:18px;white-space:pre-wrap;}
+.modal-choices{display:flex;flex-direction:column;gap:8px;}
+.modal-choice{background:#1a1408;border:1px solid #3a2e1a;border-radius:6px;padding:11px 14px;color:#c8b880;font-size:var(--fs-sm);cursor:pointer;transition:all .15s;text-align:left;}
+.modal-choice:hover{border-color:var(--gold);color:var(--gold2);background:#241c10;}
+.choice-effect{font-size:var(--fs-xs);color:#5a4820;display:block;margin-top:3px;}
+
+/* エンディング */
+#screen-ending{display:none;width:100%;min-height:100vh;align-items:center;justify-content:center;flex-direction:column;padding:40px 20px;text-align:center;background:radial-gradient(ellipse at 50% 50%,#1a1208,#0a0804);}
+.ending-icon{font-size:80px;margin-bottom:24px;animation:float 3s ease-in-out infinite;}
+.ending-title{font-family:'Noto Serif JP',serif;font-size:30px;color:var(--gold2);margin-bottom:14px;}
+.ending-body{font-size:var(--fs);color:#a08850;line-height:2.2;max-width:500px;margin-bottom:36px;white-space:pre-wrap;}
+.btn-retry{background:transparent;border:1px solid var(--gold);border-radius:6px;padding:14px 40px;color:var(--gold2);font-size:var(--fs);letter-spacing:3px;cursor:pointer;}
+</style>
+</head>
+<body>
+
+<!-- タイトル -->
+<div id="screen-title">
+  <div class="title-kamon">🏯</div>
+  <div class="title-main">転生したら竹千代（10歳）だった件</div>
+  <div class="title-sub">桶狭間を消して生き残る</div>
+  <div class="title-catch">〜 戦わないだけで、歴史はバグる。〜</div>
+  <button class="btn-start" onclick="startGame()">ゲームを始める</button>
+</div>
+
+<!-- ゲーム画面 -->
+<div id="screen-game">
+  <div class="phase-bar">
+    <span class="phase-label">◆</span>
+    <div class="phase-dots">
+      <div class="phase-dot active" id="dot-0"></div>
+      <div class="phase-dot" id="dot-1"></div>
+      <div class="phase-dot" id="dot-2"></div>
+    </div>
+    <span class="phase-label" id="phase-name">序盤：影の時代</span>
+    <span class="year-info" id="year-info">天文19年 / 1550年（11歳）</span>
+  </div>
+
+  <div class="log-area" id="log-area"></div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tab-btn-param" onclick="switchTab('param')">📊 パラメータ</button>
+    <button class="tab-btn"        id="tab-btn-cmd"   onclick="switchTab('cmd')">⚙ コマンド</button>
+  </div>
+
+  <!-- パラメータタブ -->
+  <div class="tab-content active" id="tab-param">
+    <div class="param-section">
+      <div class="param-section-title">▶ 状態</div>
+      <div class="param-row">
+        <span class="param-row-label">🤝 氏真信頼度</span>
+        <div class="param-bar-wrap"><div class="param-bar bar-trust" id="bar-trust" style="width:0%"></div></div>
+        <span class="param-val" id="val-trust">0 / 100</span>
+      </div>
+      <div class="param-row">
+        <span class="param-row-label">👁 バレ度</span>
+        <div class="param-bar-wrap"><div class="param-bar bar-bare" id="bar-bare" style="width:0%"></div></div>
+        <span class="param-val" id="val-bare">0 / 100</span>
+      </div>
+      <div class="param-row">
+        <span class="param-row-label">🔥 信長の注目度</span>
+        <div class="param-bar-wrap"><div class="param-bar bar-nobunaga" id="bar-nobunaga" style="width:0%"></div></div>
+        <span class="param-val" id="val-nobunaga">0 / 100</span>
+      </div>
+      <div class="param-row">
+        <span class="param-row-label">⚡ 実行力</span>
+        <div class="param-bar-wrap"><div class="param-bar bar-exec" id="bar-exec" style="width:0%"></div></div>
+        <span class="param-val" id="val-exec">0</span>
+      </div>
+    </div>
+    <div class="param-section">
+      <div class="param-section-title">▶ 今川の国力</div>
+      <table class="stat-table">
+        <tr><td>💰 経済力</td><td id="val-economy">100万石</td></tr>
+        <tr><td>　↳ 来年加算</td><td id="val-economy-next" class="good">+0万石</td></tr>
+        <tr><td>👥 人口</td><td id="val-population">100万人</td></tr>
+        <tr><td>⚔ 単純兵力</td><td id="val-simple-mil">25,000人</td></tr>
+        <tr><td>🗡 軍事力</td><td id="val-military">0</td></tr>
+        <tr><td>💪 軍隊の強さ</td><td id="val-army-power">25,000</td></tr>
+        <tr><td>📊 兵力割合</td><td id="val-milrate">2.5%</td></tr>
+      </table>
+    </div>
+    <div class="param-section">
+      <div class="param-section-title">▶ 今年の行動</div>
+      <table class="stat-table">
+        <tr><td>💴 予算</td><td id="val-budget">10万石</td></tr>
+        <tr><td>　↳ 残予算</td><td id="val-budget-left" class="good">10万石</td></tr>
+        <tr><td id="actions-label">📋 残コマンド数</td><td id="val-actions">4回</td></tr>
+      </table>
+    </div>
+    <div class="param-section">
+      <div class="param-section-title">▶ 周辺国</div>
+      <div class="enemy-grid">
+        <div class="enemy-card">
+          <div class="enemy-name">⚔ 武田</div>
+          <div class="enemy-row">経済力：<span class="enemy-val">50万石</span></div>
+          <div class="enemy-row">単純兵力：<span class="enemy-val">20,000人</span></div>
+          <div class="enemy-row">備考：<span class="enemy-val warn">攻撃×1.5</span></div>
+        </div>
+        <div class="enemy-card">
+          <div class="enemy-name">🏯 北条</div>
+          <div class="enemy-row">経済力：<span class="enemy-val">90万石</span></div>
+          <div class="enemy-row">単純兵力：<span class="enemy-val">22,500人</span></div>
+          <div class="enemy-row">備考：<span class="enemy-val warn">防御×2.0</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- コマンドタブ -->
+  <div class="tab-content" id="tab-cmd">
+    <div id="cmd-container"></div>
+    <button class="btn-turn" id="btn-turn-end" onclick="endYear()">▶ 年を終える</button>
+  </div>
+</div>
+
+<!-- エンディング -->
+<div id="screen-ending">
+  <div class="ending-icon" id="ending-icon">⚔</div>
+  <div class="ending-title" id="ending-title">―</div>
+  <div class="ending-body" id="ending-body">―</div>
+  <button class="btn-retry" onclick="location.reload()">もう一度プレイ</button>
+</div>
+
+<!-- モーダル -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-box">
+    <div class="modal-tag" id="modal-tag">イベント</div>
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-choices" id="modal-choices"></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  定数
+// ══════════════════════════════════════════
+const PHASE_NAMES=['序盤：影の時代','中盤：今川列強化','終盤：安祥城'];
+const START_YEAR=1550; // 天文19年＝11歳スタート（元服1552年、決戦1554年）
+const AGE_OFFSET=11;
+const BUDGET_RATE_INIT=0.10; // 初期予算率10%
+const MILRATE_INIT=2.5;      // 兵力割合2.5%
+
+const DIFF=[
+  {key:'impossible',label:'【不可能】',rate:0,   execGain:0 },
+  {key:'hard',      label:'【困難】',  rate:.25,  execGain:16},
+  {key:'challenge', label:'【挑戦】',  rate:.5,   execGain:8 },
+  {key:'possible',  label:'【可能】',  rate:.75,  execGain:4 },
+  {key:'easy',      label:'【容易】',  rate:1.0,  execGain:2 },
+];
+function getDiff(exec,need){
+  const p=exec-need;
+  if(p< -50) return DIFF[0]; // 不可能
+  if(p<  -25) return DIFF[1]; // 困難
+  if(p<    0) return DIFF[2]; // 挑戦
+  if(p<   25) return DIFF[3]; // 可能
+  return DIFF[4];              // 容易
+}
+
+// ══════════════════════════════════════════
+//  状態
+// ══════════════════════════════════════════
+const G={
+  year:START_YEAR, phase:0,
+  trust:0, bare:0, nobunaga:0, exec:0,
+  economy:100, economyNext:0,
+  milrate:MILRATE_INIT,
+  military:0,      // 軍事力（加算値）
+  budgetRate:BUDGET_RATE_INIT,
+  budget:10, budgetLeft:10,
+  actionsLeft:4,
+  cleared:false,
+  done:new Set(),
+  middleYears:0,   // 中盤経過年数（決戦タイミング用）
+};
+
+// 派生計算
+function simpleMil(){return Math.floor(G.economy*10000*G.milrate/100);}
+function armyPower(){return Math.floor(simpleMil()*(1+G.military/100));}
+function calcBudget(){
+  // 共通：(1 + 信頼度/100) × 経済力 × 予算率(初期10%、最大50%)
+  return Math.max(10, Math.floor((1 + G.trust/100) * G.economy * G.budgetRate));
+}
+
+// ══════════════════════════════════════════
+//  コマンド定義
+// ══════════════════════════════════════════
+const CMDS=[
+  // ── 外交 ──
+  {id:'cult_dip', group:'🤝 外交', phase:[0,1,2],
+   label:'文化外交の提言', need:10, cost:3,
+   eff:'信頼度+8　経済力+3万石　バレ度+3',
+   desc:'今川の名声を外交に活かす案を出す',
+   onOK:()=>{G.trust=cap(G.trust+8);G.economy+=3;G.bare=cap(G.bare+3);},
+   onNG:()=>{},
+  },
+  {id:'sakai_trade', group:'🤝 外交', phase:[0,1,2], once:true,
+   label:'堺との貿易', need:20, cost:10,
+   eff:'経済力+15万石　信長注目+10　バレ度+15',
+   desc:'堺との交易ルートを掌握する',
+   cond:()=>G.economy>=120&&G.done.has('big_port'),
+   condLabel:'経済力120万石以上・大型船用の港が完成済み',
+   onOK:()=>{G.economy+=15;G.nobunaga=cap(G.nobunaga+10);G.bare=cap(G.bare+15);},
+   onNG:()=>{G.bare=cap(G.bare+5);},
+  },
+  {id:'fake_info', group:'🤝 外交', phase:[0,1,2],
+   label:'ニセ情報を流す', need:20, cost:3,
+   eff:'信頼度+5　信長注目+5　バレ度+5',
+   desc:'他国にニセ情報を流す',
+   onOK:()=>{G.trust=cap(G.trust+5);G.nobunaga=cap(G.nobunaga+5);G.bare=cap(G.bare+5);},
+   onNG:()=>{G.bare=cap(G.bare+10);log('ニセ情報がバレた！','fail');},
+  },
+  {id:'nobunaga_contact', group:'🤝 外交', phase:[1,2],
+   label:'信長と秘密接触', need:50, cost:10,
+   eff:'信頼度+5　信長注目+50　バレ度+15',
+   desc:'信長との同盟交渉を始める',
+   cond:()=>G.trust>=50,
+   condLabel:'信頼度50以上が必要',
+   onOK:()=>{G.trust=cap(G.trust+5);G.nobunaga=cap(G.nobunaga+50);G.bare=cap(G.bare+15);showEvent('nobunaga_contact');},
+   onNG:()=>{G.bare=cap(G.bare+8);},
+  },
+  {id:'tea_gift', group:'🤝 外交', phase:[1,2],
+   label:'信長に茶器を贈る', need:30, cost:10,
+   eff:'信長注目+30',
+   desc:'織田に茶器を送り友好をアピール',
+   onOK:()=>{G.nobunaga=cap(G.nobunaga+30);},
+   onNG:()=>{},
+  },
+  {id:'oda_intel', group:'🤝 外交', phase:[1,2], once:true,
+   label:'織田家中の情報を集める', need:40, cost:5,
+   eff:'信頼度+20',
+   desc:'織田の内部情報を探る',
+   onOK:()=>{G.trust=cap(G.trust+20);},
+   onNG:()=>{},
+  },
+  // ── 開発 ──
+  {id:'farm', group:'🏗 開発', phase:[0,1,2],
+   label:'開墾の建言', need:0, cost:3,
+   eff:'経済力+10万石（翌年）　信頼度+2',
+   desc:'石高向上の献策をする',
+   onOK:()=>{G.economyNext+=10;G.trust=cap(G.trust+2);},
+   onNG:()=>{},
+  },
+  {id:'port', group:'🏗 開発', phase:[0,1,2],
+   label:'港湾整備の提言', need:0, cost:3,
+   eff:'経済力+10万石（翌年）　信頼度+2',
+   desc:'海運力向上の献策をする',
+   onOK:()=>{G.economyNext+=10;G.trust=cap(G.trust+2);},
+   onNG:()=>{},
+  },
+  {id:'road', group:'🏗 開発', phase:[0,1,2],
+   label:'街道整備の提言', need:0, cost:3,
+   eff:'経済力+10万石（翌年）　信頼度+2',
+   desc:'陸運能力向上の献策をする',
+   onOK:()=>{G.economyNext+=10;G.trust=cap(G.trust+2);},
+   onNG:()=>{},
+  },
+  {id:'big_port', group:'🏗 開発', phase:[0,1,2], once:true,
+   label:'大型船用の港', need:25, cost:10,
+   eff:'経済力+10万石（翌年）　軍事力+10　バレ度+10',
+   desc:'貿易港が開港',
+   onOK:()=>{G.economyNext+=10;G.military+=10;G.bare=cap(G.bare+10);},
+   onNG:()=>{G.bare=cap(G.bare+5);},
+  },
+  {id:'iron', group:'🏗 開発', phase:[0,1,2], once:true,
+   label:'鉄精製技術の開発', need:25, cost:5,
+   eff:'経済力+5万石（翌年）　軍事力+10　バレ度+10',
+   desc:'鉄の精製技術を開発する',
+   onOK:()=>{G.economyNext+=5;G.military+=10;G.bare=cap(G.bare+10);},
+   onNG:()=>{G.bare=cap(G.bare+5);},
+  },
+  {id:'gunpowder', group:'🏗 開発', phase:[1,2], once:true,
+   label:'堺商人との火薬取引【特殊】', need:25, cost:5,
+   eff:'軍事力+20　バレ度+10',
+   desc:'火薬の製造技術を開発する',
+   cond:()=>G.done.has('big_port'),
+   condLabel:'「大型船用の港」実施済み',
+   onOK:()=>{G.military+=20;G.bare=cap(G.bare+10);},
+   onNG:()=>{G.bare=cap(G.bare+8);},
+  },
+  {id:'craftsman', group:'🏗 開発', phase:[0,1,2], once:true,
+   label:'職人入手', need:25, cost:3,
+   eff:'経済力+10万石　バレ度+5',
+   desc:'技術開発できる職人を増やす',
+   onOK:()=>{G.economy+=10;G.bare=cap(G.bare+5);},
+   onNG:()=>{},
+  },
+  // ── 軍事 ──
+  {id:'heino', group:'⚔ 軍事', phase:[0,1,2], once:true,
+   label:'兵農分離', need:10, cost:3,
+   eff:'軍事力+10　バレ度+10',
+   desc:'武士の専門性アップ',
+   onOK:()=>{G.military+=10;G.bare=cap(G.bare+10);},
+   onNG:()=>{G.bare=cap(G.bare+5);},
+  },
+  {id:'training', group:'⚔ 軍事', phase:[0,1,2],
+   label:'軍事訓練', need:10, cost:3,
+   eff:'軍事力+5（兵農分離済なら+10）',
+   desc:'兵の練度向上を氏真に進言',
+   onOK:()=>{G.military+=G.done.has('heino')?10:5;},
+   onNG:()=>{},
+  },
+  {id:'three_volley', group:'⚔ 軍事', phase:[0,1,2], once:true,
+   label:'3段撃ち演習【特殊】', need:20, cost:3,
+   eff:'軍事力+20',
+   desc:'鉄砲の3段撃ちの練習',
+   cond:()=>G.done.has('heino'),
+   condLabel:'「兵農分離」実施済み',
+   onOK:()=>{G.military+=20;},
+   onNG:()=>{},
+  },
+  {id:'gun_buy', group:'⚔ 軍事', phase:[0,1,2],
+   label:'鉄砲購入', need:10, cost:10,
+   eff:'信長注目+10　軍事力+5　バレ度+5',
+   desc:'堺経由での鉄砲買付',
+   onOK:()=>{G.nobunaga=cap(G.nobunaga+10);G.military+=5;G.bare=cap(G.bare+5);},
+   onNG:()=>{},
+  },
+  {id:'gun_make', group:'⚔ 軍事', phase:[1,2], once:true,
+   label:'鉄砲の自国生産【特殊】', need:50, cost:10,
+   eff:'軍事力+20　バレ度+10',
+   desc:'鉄砲の国産で低コスト化',
+   cond:()=>G.done.has('iron')&&G.done.has('gunpowder')&&G.done.has('craftsman'),
+   condLabel:'「鉄精製技術の開発」「堺商人との火薬取引」「職人入手」が実施済み',
+   onOK:()=>{G.military+=20;G.bare=cap(G.bare+10);},
+   onNG:()=>{G.bare=cap(G.bare+8);},
+  },
+  {id:'all_weather_gun', group:'⚔ 軍事', phase:[1,2], once:true,
+   label:'全天候対応鉄砲の自国生産【特殊】', need:75, cost:20,
+   eff:'軍事力+40　バレ度+15',
+   desc:'火縄から撃鉄にして全天候対応',
+   cond:()=>G.done.has('gun_make'),
+   condLabel:'「鉄砲の自国生産」実施済み',
+   onOK:()=>{G.military+=40;G.bare=cap(G.bare+15);},
+   onNG:()=>{G.bare=cap(G.bare+10);},
+  },
+  // ── バレ度回復 ──
+  {id:'lowprofile', group:'🌿 バレ度回復', phase:[0,1,2],
+   label:'目立たぬ日々を過ごす', need:0, cost:1,
+   eff:'バレ度-10',
+   desc:'しばらく大人しくして疑惑を薄める',
+   onOK:()=>{G.bare=cap(G.bare-10);},
+   onNG:()=>{},
+  },
+  {id:'yield_credit', group:'🌿 バレ度回復', phase:[0,1,2],
+   label:'氏真に手柄を譲る', need:10, cost:2,
+   eff:'信頼度+5　バレ度-10',
+   desc:'功績を再び氏真の名で記録させる',
+   onOK:()=>{G.trust=cap(G.trust+5);G.bare=cap(G.bare-10);},
+   onNG:()=>{},
+  },
+  {id:'tea_party', group:'🌿 バレ度回復', phase:[0,1,2],
+   label:'氏真の茶会を主催させる', need:20, cost:3,
+   eff:'信頼度+10　バレ度-15',
+   desc:'氏真を表舞台に立たせ自分は引く',
+   onOK:()=>{G.trust=cap(G.trust+10);G.bare=cap(G.bare-15);},
+   onNG:()=>{},
+  },
+  // ── 終盤専用 ──
+  {id:'nobukatu_stop', group:'👑 終盤', phase:[2], once:true,
+   label:'信勝の内乱を未然に防ぐ【特殊】', need:50, cost:10,
+   eff:'信長注目+50　→エンディングイベントへ　⚠ 1556年までに実施必須',
+   desc:'謀反を辞めさせるため、信勝と自分を交換する',
+   cond:()=>G.done.has('oda_intel'),
+   condLabel:'「織田家中の情報を集める」実施済み',
+   onOK:()=>{G.nobunaga=cap(G.nobunaga+50);setTimeout(()=>showEvent('final_event'),400);},
+   onNG:()=>{G.bare=cap(G.bare+15);},
+  },
+];
+
+// ══════════════════════════════════════════
+//  イベント
+// ══════════════════════════════════════════
+const EVENTS={
+  kassin_doubt:{
+    tag:'⚠ 家臣の疑念',
+    title:'「あの小僧、怪しくないか？」',
+    body:'太原雪斎の弟子・山田某が竹千代の行動に疑念を抱き始めた。\nこのまま放置すれば義元の耳に入るかもしれない。',
+    choices:[
+      {label:'氏真に庇ってもらう',      effect:'信頼度-8　バレ度-15', fn:()=>{G.trust=cap(G.trust-8);G.bare=cap(G.bare-15);log('氏真が庇った。「竹千代は我が友。疑うな」','good');}},
+      {label:'文化活動で印象を和らげる', effect:'バレ度-10',           fn:()=>{G.bare=cap(G.bare-10);log('茶道の席に顔を出し、無害な印象を演じた。','good');}},
+      {label:'無視する',                effect:'なし',                fn:()=>{log('何もしなかった。家臣の目が続く…','warning');}},
+    ]
+  },
+  nobunaga_contact:{
+    tag:'📜 信長からの返書',
+    title:'「面白い。——だが、信を示せ」',
+    body:'「今川の内情を一つ教えよ。」\n織田信長から返書が届いた。',
+    choices:[
+      {label:'今川の軍備を教える', effect:'信頼度-5　バレ度+8　注目+10', fn:()=>{G.trust=cap(G.trust-5);G.bare=cap(G.bare+8);G.nobunaga=cap(G.nobunaga+10);log('信長との交渉が前進した。しかしリスクも高まった。','warning');}},
+      {label:'曖昧な情報だけ渡す', effect:'バレ度+5',                    fn:()=>{G.bare=cap(G.bare+5);log('信長は「まぁよかろう」と答えた。交渉は続く。','good');}},
+    ]
+  },
+  coalition_battle:{
+    tag:'⚔ 決戦',
+    title:'武田・北条連合軍、侵攻！',
+    body:'中盤最後の年、武田と北条が連合を組み今川に攻め込んできた。\n\n連合軍の兵力は今川の2倍以上——\n竹千代がここまで積み上げてきた全てが試される。',
+    choices:[
+      {label:'迎え撃つ！', effect:'戦力比で勝敗決定', fn:()=>{ closeModal(); resolveCoalitionBattle(); }},
+    ]
+  },
+  final_event:{
+    tag:'🌟 最終決断',
+    title:'信長との謁見',
+    body:'信勝の謀反を未然に防いだ竹千代。\n信長は驚きを隠せず、その目を細めた。\n\n「……お前は、何者だ」\n\n天下の形を、今ここで決める。',
+    choices:[
+      {label:'全てを打ち明ける', effect:'信頼度≧100・注目度≧50でトゥルーエンドへ', fn:()=>{closeModal();checkFinalEnding();}},
+    ]
+  },
+};
+
+// ══════════════════════════════════════════
+//  中盤決戦
+// ══════════════════════════════════════════
+function resolveCoalitionBattle(){
+  // 連合軍：武田(20000)×1.5攻撃 + 北条(22500) → 単純兵力換算
+  const enemyPower = 20000*1.5 + 22500; // ≒52500
+  const myPower    = armyPower();
+  const x          = myPower / enemyPower;
+
+  log('【決戦】今川の軍隊の強さ：'+Math.floor(myPower).toLocaleString()+'　連合軍：'+Math.floor(enemyPower).toLocaleString(),'system');
+  log('戦力比 x = '+x.toFixed(2),'system');
+
+  if(x>=3){
+    log('結果：返り討ち！武田・北条が属国化','good');
+    G.economy+=50; G.trust=cap(G.trust+20);
+    showEvent('battle_victory_great');
+  } else if(x>=1.5){
+    log('結果：勝利！戦後賠償で経済力+100万石','good');
+    G.economy+=100;
+    showEvent('battle_victory');
+  } else if(x>=1){
+    log('結果：辛勝…　石高・経済力-50万石　信長注目-25','warning');
+    G.economy=Math.max(10,G.economy-50);
+    G.nobunaga=cap(G.nobunaga-25);
+    showEvent('battle_close');
+  } else {
+    ending('gameover','💀','敗北——今川滅亡',
+      '武田・北条連合軍に敗れた。\n今川は滅び、竹千代の夢も消えた。\n\n戦力を高めてもう一度挑め。');
+  }
+
+  // 中盤→終盤へ
+  if(!G.cleared){
+    G.phase=2;
+    logPhase('【終盤】安祥城へ——信長との最前線');
+    log('今川の武名が天下に轟いた。安祥城への入城が決まった。','system');
+    log('⚠ 密偵より緊急報告：1556年、織田家中で信勝による謀反の動きあり。','danger');
+    log('1556年までに「信勝の内乱を未然に防ぐ」を実施せよ！','warning');
+    G.budget=calcBudget(); G.budgetLeft=G.budget; G.actionsLeft=999;
+    updateUI();
+    setTimeout(()=>showEvent('nobukatu_warning'),600);
+  }
+}
+
+// 決戦後イベント（モーダルのみ）
+EVENTS.nobukatu_warning={
+  tag:'⚠ 緊急情報',
+  title:'「信勝様に、不穏な動きが……」',
+  body:'安祥城に入った竹千代のもとへ、密偵から報告が届いた。\n\n「天文25年（1556年）、織田信長の弟・信勝が謀反を企てているとの情報あり。\nこのまま放置すれば織田家は内乱で弱体化し、今川との同盟は水泡に帰す」\n\n1556年までに「信勝の内乱を未然に防ぐ【特殊】」を実施せよ。\nまずは「織田家中の情報を集める」で条件を満たすこと。',
+  choices:[
+    {label:'了解。直ちに動く', effect:'', fn:()=>{}}
+  ]
+};
+
+EVENTS.battle_victory_great={
+  tag:'🎉 大勝利',title:'返り討ち——武田・北条が膝を屈した',
+  body:'「今川の軍は化け物か……」\n\n武田・北条が属国化。\n今川は東国最強の地位を確立した。\n経済力+50万石　信頼度+20',
+  choices:[{label:'続ける',effect:'',fn:()=>{}}]
+};
+EVENTS.battle_victory={
+  tag:'⚔ 勝利',title:'勝利——戦後賠償を得た',
+  body:'激戦の末、今川が勝利した。\n\n戦後賠償として経済力+100万石を獲得。',
+  choices:[{label:'続ける',effect:'',fn:()=>{}}]
+};
+EVENTS.battle_close={
+  tag:'😰 辛勝',title:'辛勝——代償は大きかった',
+  body:'かろうじて勝利したが、多大な損害を受けた。\n石高・経済力-50万石、信長の注目-25。',
+  choices:[{label:'続ける',effect:'',fn:()=>{}}]
+};
+
+// ══════════════════════════════════════════
+//  ユーティリティ
+// ══════════════════════════════════════════
+function cap(v,mn=0,mx=100){return Math.max(mn,Math.min(mx,v));}
+
+function log(msg,type=''){
+  const el=document.createElement('div');
+  el.className='log-entry'+(type?' '+type:'');
+  el.textContent='▸ '+msg;
+  const a=document.getElementById('log-area');
+  a.appendChild(el);a.scrollTop=a.scrollHeight;
+}
+function logPhase(msg){
+  const el=document.createElement('div');
+  el.className='log-phase';
+  el.textContent='═══ '+msg+' ═══';
+  const a=document.getElementById('log-area');
+  a.appendChild(el);a.scrollTop=a.scrollHeight;
+}
+function flash(ok){
+  const el=document.createElement('div');
+  el.className='result-flash '+(ok?'success':'fail');
+  el.textContent=ok?'成功！':'失敗…';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),950);
+}
+
+// ══════════════════════════════════════════
+//  タブ・アコーディオン
+// ══════════════════════════════════════════
+function switchTab(name){
+  ['param','cmd'].forEach(t=>{
+    document.getElementById('tab-'+t).classList.toggle('active',t===name);
+    document.getElementById('tab-btn-'+t).classList.toggle('active',t===name);
+  });
+}
+const accState={};
+function toggleAcc(gid){
+  accState[gid]=!accState[gid];
+  document.getElementById('acc-header-'+gid).classList.toggle('open',accState[gid]);
+  document.getElementById('acc-body-'+gid).classList.toggle('open',accState[gid]);
+}
+
+// ══════════════════════════════════════════
+//  UI更新
+// ══════════════════════════════════════════
+function updateUI(){
+  document.getElementById('bar-trust').style.width=G.trust+'%';
+  document.getElementById('val-trust').textContent=G.trust+' / 100';
+  document.getElementById('bar-nobunaga').style.width=G.nobunaga+'%';
+  document.getElementById('val-nobunaga').textContent=G.nobunaga+' / 100';
+  document.getElementById('bar-exec').style.width=Math.min(G.exec,100)+'%';
+  document.getElementById('val-exec').textContent=G.exec;
+
+  const bb=document.getElementById('bar-bare');
+  bb.style.width=G.bare+'%';
+  document.getElementById('val-bare').textContent=G.bare+' / 100';
+  bb.className='param-bar bar-bare';
+  if(G.bare>=76)bb.classList.add('danger');
+  else if(G.bare>=56)bb.classList.add('warn');
+
+  const sm=simpleMil();
+  const ap=armyPower();
+  document.getElementById('val-economy').textContent=G.economy+'万石';
+  document.getElementById('val-economy-next').textContent='+'+G.economyNext+'万石';
+  document.getElementById('val-population').textContent=G.economy+'万人';
+  document.getElementById('val-simple-mil').textContent=sm.toLocaleString()+'人';
+  document.getElementById('val-military').textContent=G.military;
+  document.getElementById('val-army-power').textContent=ap.toLocaleString();
+  document.getElementById('val-milrate').textContent=G.milrate+'%';
+
+  document.getElementById('val-budget').textContent=G.budget+'万石';
+  const bl=document.getElementById('val-budget-left');
+  bl.textContent=G.budgetLeft+'万石';
+  bl.className=G.budgetLeft<=0?'danger':G.budgetLeft<=3?'warn':'good';
+  document.getElementById('val-actions').textContent=G.phase===1?'（予算制）':G.actionsLeft+'回';
+  document.getElementById('actions-label').textContent=G.phase===1?'📋 コマンド':'📋 残コマンド数';
+
+  for(let i=0;i<3;i++){
+    const d=document.getElementById('dot-'+i);
+    d.className='phase-dot';
+    if(i<G.phase)d.classList.add('done');
+    else if(i===G.phase)d.classList.add('active');
+  }
+  document.getElementById('phase-name').textContent=PHASE_NAMES[G.phase];
+  const age=AGE_OFFSET+(G.year-START_YEAR);
+  document.getElementById('year-info').textContent='天文'+(G.year-1531)+'年 / '+G.year+'年（'+age+'歳）';
+  document.getElementById('btn-turn-end').textContent=G.phase===1?'▶ 予算を締める':'▶ 年を終える';
+
+  renderCommands();
+}
+
+// ══════════════════════════════════════════
+//  コマンド描画
+// ══════════════════════════════════════════
+function renderCommands(){
+  const container=document.getElementById('cmd-container');
+  container.innerHTML='';
+
+  const visible=CMDS.filter(c=>{
+    if(!c.phase.includes(G.phase))return false;
+    if(c.once&&G.done.has(c.id))return false;
+    return true;
+  });
+
+  const groups={};
+  visible.forEach(c=>{
+    if(!groups[c.group])groups[c.group]=[];
+    groups[c.group].push(c);
+  });
+
+  Object.entries(groups).forEach(([gName,gcmds],gi)=>{
+    const gid='grp_'+gi;
+    if(accState[gid]===undefined)accState[gid]=false;
+
+    const hdr=document.createElement('div');
+    hdr.className='acc-header'+(accState[gid]?' open':'');
+    hdr.id='acc-header-'+gid;
+    hdr.innerHTML='<span class="acc-title">'+gName+'</span><span class="acc-arrow">▼</span>';
+    hdr.onclick=()=>toggleAcc(gid);
+    container.appendChild(hdr);
+
+    const body=document.createElement('div');
+    body.className='acc-body'+(accState[gid]?' open':'');
+    body.id='acc-body-'+gid;
+
+    gcmds.forEach(c=>{
+      const diff=getDiff(G.exec,c.need);
+      const condOk=!c.cond||c.cond();
+      const budgetOk=G.budgetLeft>=c.cost;
+      const actOk=G.phase===1?G.budgetLeft>0:G.actionsLeft>0;
+      const canUse=condOk&&budgetOk&&actOk&&diff.key!=='impossible';
+
+      const btn=document.createElement('button');
+      btn.className='cmd-btn';
+      btn.disabled=!canUse;
+
+      let extra='';
+      if(!condOk&&c.condLabel) extra+='<div class="cmd-lock">🔒 '+c.condLabel+'</div>';
+      else if(!budgetOk)       extra+='<div class="cmd-lock">💴 予算不足（'+c.cost+'万石必要）</div>';
+
+      btn.innerHTML=
+        '<div class="cmd-header-row">'+
+          '<span class="cmd-name">'+c.label+'</span>'+
+          '<span class="cmd-diff diff-'+diff.key+'">'+diff.label+'</span>'+
+        '</div>'+
+        '<div class="cmd-desc">'+c.desc+(c.cost>0?' ／ '+c.cost+'万石':'')+'</div>'+
+        '<div class="cmd-effect">'+c.eff+'</div>'+extra;
+
+      btn.onclick=()=>execCmd(c,diff);
+      body.appendChild(btn);
+    });
+    container.appendChild(body);
+  });
+}
+
+// ══════════════════════════════════════════
+//  コマンド実行
+// ══════════════════════════════════════════
+function execCmd(cmd,diff){
+  if(G.cleared)return;
+  G.budgetLeft-=cmd.cost;
+  if(G.phase!==1)G.actionsLeft--;
+
+  const ok=diff.key!=='impossible'&&Math.random()<diff.rate;
+  if(ok){
+    flash(true);
+    log('【'+cmd.label+'】成功！','good');
+    cmd.onOK();
+    G.trust=cap(G.trust+5); // 成功ボーナス
+    if(diff.execGain)G.exec+=diff.execGain;
+    // 予算率アップ（成功+1%、最大50%）
+    if(G.phase===0&&G.budgetRate<0.5) G.budgetRate=Math.min(0.5,G.budgetRate+0.01);
+    if(cmd.once)G.done.add(cmd.id);
+  } else {
+    flash(false);
+    log('【'+cmd.label+'】失敗…','fail');
+    cmd.onNG();
+    G.trust=cap(G.trust-1);
+    // 予算率ダウン（失敗-1%）
+    if(G.phase===0) G.budgetRate=Math.max(0.01,G.budgetRate-0.01);
+  }
+  updateUI();
+  checkEvents();
+  checkEnding();
+}
+
+// ══════════════════════════════════════════
+//  年終了
+// ══════════════════════════════════════════
+function endYear(){
+  G.economy+=G.economyNext;
+  G.economyNext=0;
+  G.bare=cap(G.bare-2);
+  G.year++;
+  const age=AGE_OFFSET+(G.year-START_YEAR);
+
+  // 序盤→中盤
+  if(age>=15&&G.phase===0){
+    G.phase=1;
+    G.middleYears=0;
+    logPhase('【中盤】元服——松平元康として動き始める');
+    log('14歳で元服。予算の範囲でコマンドを実行できる。','system');
+    log('「予算を締める」で年終了。1554年に不穏な情報が入り、1555年に武田・北条が動く……','warning');
+  }
+
+  // 中盤：1554年に警告、1555年に決戦
+  if(G.phase===1 && G.year===1554){
+    log('── 天文'+(G.year-1531)+'年 / '+G.year+'年（'+age+'歳）開始 ──');
+    log('⚠ 密偵から報告が入った。武田・北条が連合を組む動きがある……','warning');
+    log('来年（1555年）までに軍備を整えよ！','warning');
+    G.budget=calcBudget(); G.budgetLeft=G.budget; G.actionsLeft=999;
+    updateUI();
+    checkEvents();
+    return;
+  }
+  if(G.phase===1 && G.year===1555){
+    G.budget=calcBudget(); G.budgetLeft=G.budget; G.actionsLeft=999;
+    log('── 天文'+(G.year-1531)+'年 / '+G.year+'年（'+age+'歳）開始 ──');
+    log('1555年。武田・北条連合軍が今川領へ侵攻を開始した！','danger');
+    updateUI();
+    setTimeout(()=>showEvent('coalition_battle'),600);
+    return;
+  }
+
+  // 予算・行動リセット
+  G.budget=calcBudget();
+  G.budgetLeft=G.budget;
+  G.actionsLeft=G.phase===0?4:999;
+
+  log('── 天文'+(G.year-1531)+'年 / '+G.year+'年（'+age+'歳）開始 ──');
+  updateUI();
+  checkEvents();
+  checkEnding();
+}
+
+// ══════════════════════════════════════════
+//  イベント・エンディング
+// ══════════════════════════════════════════
+const fired=new Set();
+function checkEvents(){
+  if(G.bare>=40&&!fired.has('kassin_doubt')){
+    fired.add('kassin_doubt');
+    setTimeout(()=>showEvent('kassin_doubt'),400);
+  }
+  // 1556年タイムリミット：信勝の乱を防がなかった場合ゲームオーバー
+  if(G.phase===2 && G.year>1556 && !G.done.has('nobukatu_stop') && !fired.has('nobukatu_failed')){
+    fired.add('nobukatu_failed');
+    setTimeout(()=>{
+      ending('gameover_nobukatu','🔥','信勝の乱——織田崩壊',
+        '天文25年（1556年）、織田家で信勝の謀反が勃発した。\n\n情報を掴んでいながら、手を打てなかった……\n内乱で織田は弱体化し、今川との同盟の夢は消えた。\n\n【ヒント】終盤に入ったら早めに情報収集→信勝の乱を防ごう。');
+    },400);
+  }
+}
+
+function showEvent(id){
+  const ev=EVENTS[id];if(!ev)return;
+  document.getElementById('modal-tag').textContent=ev.tag;
+  document.getElementById('modal-title').textContent=ev.title;
+  document.getElementById('modal-body').textContent=ev.body;
+  const cc=document.getElementById('modal-choices');cc.innerHTML='';
+  ev.choices.forEach(ch=>{
+    const btn=document.createElement('button');
+    btn.className='modal-choice';
+    btn.innerHTML=ch.label+(ch.effect?'<span class="choice-effect">効果: '+ch.effect+'</span>':'');
+    btn.onclick=()=>{closeModal();ch.fn();updateUI();};
+    cc.appendChild(btn);
+  });
+  document.getElementById('modal').classList.add('show');
+}
+function closeModal(){document.getElementById('modal').classList.remove('show');}
+
+function checkFinalEnding(){
+  if(G.trust>=100&&G.nobunaga>=50){
+    ending('true','🏯','二国同盟エンド',
+      '信頼度と信長の注目が頂点に達した。\n\n松平元康と織田信長。\n二人の異才が手を結んだ。\n\n戦わない天下——\nそれは、誰も見たことのない歴史の形だった。\n\n桶狭間は、消えた。');
+  } else {
+    ending('bad','⚔','Badエンド',
+      '信長との信頼が足りなかった。\n今川と織田は激突する。\n桶狭間が再び動き始める……\n\n【条件】信頼度100以上・信長注目度50以上でトゥルーエンド');
+  }
+}
+
+function checkEnding(){
+  if(G.cleared)return;
+  if(G.bare>=100){
+    ending('gameover','💀','追放——',
+      '「この人質め、ただの子どもではなかったか…」\n\n今川の家臣団が動いた。\n竹千代は駿府を追われた。\n\n歴史は、再び桶狭間へと向かっていく。');
+  }
+}
+
+function ending(type,icon,title,body){
+  if(G.cleared)return;
+  G.cleared=true;
+  document.getElementById('ending-icon').textContent=icon;
+  document.getElementById('ending-title').textContent=title;
+  document.getElementById('ending-body').textContent=body;
+  document.getElementById('screen-game').style.display='none';
+  const es=document.getElementById('screen-ending');
+  es.style.display='flex';
+}
+
+// ══════════════════════════════════════════
+//  ゲーム開始
+// ══════════════════════════════════════════
+function startGame(){
+  G.budget=Math.max(10,Math.floor(G.economy*G.budgetRate));
+  G.budgetLeft=G.budget;
+  G.actionsLeft=4;
+  document.getElementById('screen-title').style.display='none';
+  document.getElementById('screen-game').style.display='block';
+  logPhase('【序盤】影の時代——人質、竹千代');
+  log('天文19年（1550年）。ここは駿府、今川義元の城下。','system');
+  log('転生した俺——竹千代（11歳）——は今川家に人質として預けられている。','system');
+  log('14歳の元服（1552年）まで、年に4回だけ氏真に進言できる。','system');
+  log('1554年に不穏な情報が入り、1555年に武田・北条が動く。それまでに備えよ。','warning');
+  updateUI();
+}
+</script>
+</body>
+</html>
