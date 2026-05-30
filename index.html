@@ -571,18 +571,19 @@ function resolveCoalitionBattle(){
     ending('gameover','💀','敗北——今川滅亡',
       '武田・北条連合軍に敗れた。\n今川は滅び、竹千代の夢も消えた。\n\n戦力を高めてもう一度挑め。');
   }
+}
 
-  // 中盤→終盤へ
-  if(!G.cleared){
-    G.phase=2;
-    logPhase('【終盤】安祥城へ——信長との最前線');
-    log('今川の武名が天下に轟いた。安祥城への入城が決まった。','system');
-    log('⚠ 密偵より緊急報告：1556年、織田家中で信勝による謀反の動きあり。','danger');
-    log('1556年までに「信勝の内乱を未然に防ぐ」を実施せよ！','warning');
-    G.budget=calcBudget(); G.budgetLeft=G.budget; G.actionsLeft=999;
-    updateUI();
-    setTimeout(()=>showEvent('nobukatu_warning'),600);
-  }
+// 戦闘終了→終盤移行処理
+function enterFinalPhase(){
+  if(G.cleared)return;
+  G.phase=2;
+  logPhase('【終盤】安祥城へ——信長との最前線');
+  log('今川の武名が天下に轟いた。安祥城への入城が決まった。','system');
+  log('⚠ 密偵より緊急報告：1556年、織田家中で信勝による謀反の動きあり。','danger');
+  log('1556年までに「信勝の内乱を未然に防ぐ」を実施せよ！','warning');
+  G.budget=calcBudget(); G.budgetLeft=G.budget; G.actionsLeft=999;
+  updateUI();
+  setTimeout(()=>showEvent('nobukatu_warning'),400);
 }
 
 // 決戦後イベント（モーダルのみ）
@@ -598,17 +599,17 @@ EVENTS.nobukatu_warning={
 EVENTS.battle_victory_great={
   tag:'🎉 大勝利',title:'返り討ち——武田・北条が膝を屈した',
   body:'「今川の軍は化け物か……」\n\n武田・北条が属国化。\n今川は東国最強の地位を確立した。\n経済力+50万石　信頼度+20',
-  choices:[{label:'続ける',effect:'',fn:()=>{}}]
+  choices:[{label:'終盤へ進む', effect:'', fn:()=>{ enterFinalPhase(); }}]
 };
 EVENTS.battle_victory={
   tag:'⚔ 勝利',title:'勝利——戦後賠償を得た',
   body:'激戦の末、今川が勝利した。\n\n戦後賠償として経済力+100万石を獲得。',
-  choices:[{label:'続ける',effect:'',fn:()=>{}}]
+  choices:[{label:'終盤へ進む', effect:'', fn:()=>{ enterFinalPhase(); }}]
 };
 EVENTS.battle_close={
   tag:'😰 辛勝',title:'辛勝——代償は大きかった',
   body:'かろうじて勝利したが、多大な損害を受けた。\n石高・経済力-50万石、信長の注目-25。',
-  choices:[{label:'続ける',effect:'',fn:()=>{}}]
+  choices:[{label:'終盤へ進む', effect:'', fn:()=>{ enterFinalPhase(); }}]
 };
 
 // ══════════════════════════════════════════
